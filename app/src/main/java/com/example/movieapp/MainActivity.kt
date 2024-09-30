@@ -1,5 +1,6 @@
 package com.example.movieapp
 
+import MovieDetailScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MovieAppTheme {
+            MovieAppTheme() {
                 MainScreen()
             }
         }
@@ -42,7 +43,8 @@ fun MainScreen() {
 
                 val items = listOf(
                     BottomNavItem("search", "Search", Icons.Default.Search),
-                    BottomNavItem(route = "watchlist", title = "Watchlist", icon = Icons.Default.Add)                )
+                    BottomNavItem(route = "watchlist", title = "Watchlist", icon = Icons.Default.Add)
+                )
 
                 items.forEach { item ->
                     NavigationBarItem(
@@ -65,8 +67,13 @@ fun MainScreen() {
             startDestination = "search",
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable("search") { MovieScreen() }
-            composable("watchlist") { WatchlistScreen() }        }
+            composable("search") { MovieScreen(navController = navController) }
+            composable("watchlist") { WatchlistScreen() }
+            composable("movieDetail/{imdbID}") { backStackEntry ->
+                val imdbID = backStackEntry.arguments?.getString("imdbID") ?: return@composable
+                MovieDetailScreen(imdbID = imdbID, onBackPressed = { navController.popBackStack() })
+            }
+        }
     }
 }
 

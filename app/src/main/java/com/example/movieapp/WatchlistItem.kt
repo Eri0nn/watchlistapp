@@ -10,5 +10,6 @@ data class WatchlistItem(
     @PrimaryKey val imdbID: String,
     val title: String,
     val year: String,
-    val poster: String
+    val poster: String,
+
 )

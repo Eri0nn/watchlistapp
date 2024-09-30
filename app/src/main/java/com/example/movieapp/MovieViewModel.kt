@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import android.util.Log
+import androidx.navigation.NavController
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -62,5 +63,9 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun isInWatchlist(movieId: String): Boolean {
         return watchlistDao.isInWatchlist(movieId)
+    }
+
+    fun onMovieClicked(navController: NavController, movie: Movie) {
+        navController.navigate("movieDetail/${movie.imdbID}")
     }
 }

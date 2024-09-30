@@ -57,7 +57,35 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                 Text(watchlistItem.year, style = MaterialTheme.typography.bodyMedium)
             }
             IconButton(onClick = {
-                viewModel.toggleWatchlist(Movie(watchlistItem.imdbID, watchlistItem.title, watchlistItem.year, "movie", watchlistItem.poster))
+                viewModel.toggleWatchlist(
+                    Movie(
+                        Title = watchlistItem.title,
+                        Year = watchlistItem.year,
+                        Rated = "", // Provide appropriate value
+                        Released = "", // Provide appropriate value
+                        Runtime = "", // Provide appropriate value
+                        Genre = "", // Provide appropriate value
+                        Director = "", // Provide appropriate value
+                        Writer = "", // Provide appropriate value
+                        Actors = "", // Provide appropriate value
+                        Plot = "", // Provide appropriate value
+                        Language = "", // Provide appropriate value
+                        Country = "", // Provide appropriate value
+                        Awards = "", // Provide appropriate value
+                        Poster = watchlistItem.poster,
+                        Ratings = emptyList(), // Provide appropriate value
+                        Metascore = "", // Provide appropriate value
+                        imdbRating = "", // Provide appropriate value
+                        imdbVotes = "", // Provide appropriate value
+                        imdbID = watchlistItem.imdbID,
+                        Type = "movie",
+                        DVD = "", // Provide appropriate value
+                        BoxOffice = "", // Provide appropriate value
+                        Production = "", // Provide appropriate value
+                        Website = "", // Provide appropriate value
+                        Response = "" // Provide appropriate value
+                    )
+                )
             }) {
                 Icon(
                     imageVector = Icons.Default.Delete,

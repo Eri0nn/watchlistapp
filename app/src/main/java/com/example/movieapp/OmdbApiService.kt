@@ -11,6 +11,13 @@ interface OmdbApiService {
         @Query("s") searchTerm: String,
         @Query("type") type: String = "movie"
     ): SearchResponse
+
+
+    @GET("/")
+    suspend fun getMovieDetails(
+        @Query("apikey") apiKey: String,
+        @Query("i") imdbID: String
+    ): Movie
 }
 
 object RetrofitInstance {
