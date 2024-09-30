@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-
+    kotlin("kapt") // Apply Kotlin Kapt Plugin
 }
 
 android {
@@ -73,7 +73,11 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.compose)
+
+    // Room
     implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

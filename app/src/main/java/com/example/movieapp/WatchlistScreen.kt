@@ -1,6 +1,5 @@
 package com.example.movieapp
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,23 +8,63 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import androidx.compose.ui.Alignment
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import com.example.movieapp.data.WatchlistItem  // Add this import
 
 @Composable
 fun WatchlistScreen(viewModel: MovieViewModel = viewModel()) {
-    val watchlist by viewModel.watchlist.collectAsState()
-    val movies by viewModel.movies.collectAsState()
-
-    val watchlistMovies = movies.filter { viewModel.isInWatchlist(it.imdbID) }
+    val watchlist by viewModel.watchlist.collectAsState(initial = emptyList())
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (watchlistMovies.isNotEmpty()) {
+        if (watchlist.isNotEmpty()) {
             LazyColumn {
-                items(watchlistMovies) { movie ->
-                    MovieItem(movie, viewModel)
+                items(watchlist) { watchlistItem ->
+                    WatchlistItemCard(watchlistItem, viewModel)
                 }
             }
         } else {
             Text("No movies in watchlist", modifier = Modifier.padding(16.dp))
+        }
+    }
+}
+
+@Composable
+fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = watchlistItem.poster,
+                contentDescription = "${watchlistItem.title} poster",
+                modifier = Modifier.size(100.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp)
+            ) {
+                Text(watchlistItem.title, style = MaterialTheme.typography.headlineSmall)
+                Text(watchlistItem.year, style = MaterialTheme.typography.bodyMedium)
+            }
+            IconButton(onClick = {
+                viewModel.toggleWatchlist(Movie(watchlistItem.imdbID, watchlistItem.title, watchlistItem.year, "movie", watchlistItem.poster))
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Remove from Watchlist",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }

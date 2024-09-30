@@ -13,8 +13,6 @@ import coil.compose.AsyncImage
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 
 @Composable
 fun MovieScreen(viewModel: MovieViewModel = viewModel()) {
@@ -24,28 +22,54 @@ fun MovieScreen(viewModel: MovieViewModel = viewModel()) {
 
     var searchQuery by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Watchlist App",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
             label = { Text("Search Movies") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp)
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         Button(
             onClick = { viewModel.searchMovies(searchQuery) },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
         ) {
             Text("Search")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         when {
             isLoading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
             error != null -> {
-                Text(error ?: "Unknown error occurred", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp))
+                Text(
+                    text = error ?: "Unknown error occurred",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
             }
             movies.isNotEmpty() -> {
                 LazyColumn {
@@ -55,7 +79,13 @@ fun MovieScreen(viewModel: MovieViewModel = viewModel()) {
                 }
             }
             else -> {
-                Text("No movies found", modifier = Modifier.padding(16.dp))
+                Text(
+                    "No movies found",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
@@ -63,35 +93,61 @@ fun MovieScreen(viewModel: MovieViewModel = viewModel()) {
 
 @Composable
 fun MovieItem(movie: Movie, viewModel: MovieViewModel) {
+    var isInWatchlist by remember { mutableStateOf(false) }
+
+    LaunchedEffect(movie.imdbID) {
+        isInWatchlist = viewModel.isInWatchlist(movie.imdbID)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = movie.Poster,
                 contentDescription = "${movie.Title} poster",
-                modifier = Modifier.size(100.dp)
-            )
-            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
+                    .size(120.dp)
+                    .padding(end = 16.dp)
+            )
+
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
-                Text(movie.Title, style = MaterialTheme.typography.headlineSmall)
-                Text(movie.Year, style = MaterialTheme.typography.bodyMedium)
-                Text(movie.Type, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = movie.Title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "Year: ${movie.Year}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Type: ${movie.Type}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            IconButton(onClick = { viewModel.toggleWatchlist(movie.imdbID) }) {
+
+            IconButton(onClick = {
+                viewModel.toggleWatchlist(movie)
+                isInWatchlist = !isInWatchlist
+            }) {
                 Icon(
-                    imageVector = if (viewModel.isInWatchlist(movie.imdbID)) Icons.Default.Check else Icons.Default.Add,
-                    contentDescription = "Add to Watchlist",
-                    tint = if (viewModel.isInWatchlist(movie.imdbID)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    imageVector = if (isInWatchlist) Icons.Default.Check else Icons.Default.Add,
+                    contentDescription = "Toggle Watchlist",
+                    tint = if (isInWatchlist) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
         }
