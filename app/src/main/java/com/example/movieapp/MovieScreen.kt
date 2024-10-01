@@ -38,15 +38,7 @@ fun MovieScreen(viewModel: MovieViewModel = viewModel(), navController: NavContr
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Watchlist App", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier

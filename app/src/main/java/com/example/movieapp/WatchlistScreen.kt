@@ -1,11 +1,11 @@
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,10 +15,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.movieapp.data.WatchlistItem
-import com.example.movieapp.data.WatchStatus
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.movieapp.Movie
+import com.example.movieapp.data.WatchlistItem
+import com.example.movieapp.data.WatchStatus
 import com.example.movieapp.MovieViewModel
 
 enum class WatchlistFilter {
@@ -29,35 +29,38 @@ enum class WatchlistFilter {
 @Composable
 fun WatchlistScreen(viewModel: MovieViewModel = viewModel()) {
     var currentFilter by remember { mutableStateOf(WatchlistFilter.ALL) }
+    var currentSort by remember { mutableStateOf("title") }
     val watchlist by viewModel.watchlist.collectAsState(initial = emptyList())
 
     val filteredWatchlist = when (currentFilter) {
         WatchlistFilter.ALL -> watchlist
         WatchlistFilter.PLANNED -> watchlist.filter { it.status == WatchStatus.PLANNED }
         WatchlistFilter.COMPLETED -> watchlist.filter { it.status == WatchStatus.COMPLETED }
+    }.let { list ->
+        when (currentSort) {
+            "title" -> list.sortedBy { it.title }
+            "year" -> list.sortedByDescending { it.year }
+            else -> list
+        }
     }
 
     Scaffold(
-        topBar = {
-            SmallTopAppBar(
-                title = { Text("My Watchlist") },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            FilterSelector(currentFilter) { newFilter ->
-                currentFilter = newFilter
-            }
+            FilterAndSortBar(
+                currentFilter = currentFilter,
+                currentSort = currentSort,
+                onFilterChange = { currentFilter = it },
+                onSortChange = { currentSort = it }
+            )
 
-            if (filteredWatchlist.isNotEmpty()) {
+            if (filteredWatchlist.isEmpty()) {
+                EmptyWatchlistMessage(currentFilter)
+            } else {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 160.dp),
                     contentPadding = PaddingValues(16.dp),
@@ -68,46 +71,92 @@ fun WatchlistScreen(viewModel: MovieViewModel = viewModel()) {
                         WatchlistItemCard(watchlistItem, viewModel)
                     }
                 }
-            } else {
-                EmptyWatchlistMessage(currentFilter)
             }
         }
     }
 }
 
 @Composable
-fun FilterSelector(currentFilter: WatchlistFilter, onFilterSelected: (WatchlistFilter) -> Unit) {
+fun FilterAndSortBar(
+    currentFilter: WatchlistFilter,
+    currentSort: String,
+    onFilterChange: (WatchlistFilter) -> Unit,
+    onSortChange: (String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        FilterChip(
-            selected = currentFilter == WatchlistFilter.ALL,
-            onClick = { onFilterSelected(WatchlistFilter.ALL) },
-            label = { Text("All") }
-        )
-        FilterChip(
-            selected = currentFilter == WatchlistFilter.PLANNED,
-            onClick = { onFilterSelected(WatchlistFilter.PLANNED) },
-            label = { Text("Planned") }
-        )
-        FilterChip(
-            selected = currentFilter == WatchlistFilter.COMPLETED,
-            onClick = { onFilterSelected(WatchlistFilter.COMPLETED) },
-            label = { Text("Completed") }
-        )
+        FilterDropdown(currentFilter, onFilterChange)
+        SortDropdown(currentSort, onSortChange)
     }
 }
 
 @Composable
+fun FilterDropdown(currentFilter: WatchlistFilter, onFilterChange: (WatchlistFilter) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        Button(onClick = { expanded = true }) {
+            Text("Filter: ${currentFilter.name.capitalize()}")
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            WatchlistFilter.values().forEach { filter ->
+                DropdownMenuItem(
+                    text = { Text(filter.name.capitalize()) },
+                    onClick = {
+                        onFilterChange(filter)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SortDropdown(currentSort: String, onSortChange: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        Button(onClick = { expanded = true }) {
+            Text("Sort: ${currentSort.capitalize()}")
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            listOf("title", "year", "rating", "release date").forEach { sortOption ->
+                DropdownMenuItem(
+                    text = { Text("Sort by ${sortOption.capitalize()}") },
+                    onClick = {
+                        onSortChange(sortOption)
+                        expanded = false
+                    },
+                    leadingIcon = {
+                        if (currentSort == sortOption) Icon(Icons.Default.Check, contentDescription = null)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(0.7f),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = { expanded = !expanded }
     ) {
         Box {
             AsyncImage(
@@ -137,7 +186,10 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                         text = watchlistItem.year,
                         style = MaterialTheme.typography.bodySmall
                     )
-                    WatchStatusToggle(watchlistItem, viewModel)
+                    if (expanded) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        WatchStatusToggle(watchlistItem, viewModel)
+                    }
                 }
             }
             IconButton(
@@ -148,10 +200,11 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                             Title = watchlistItem.title,
                             Year = watchlistItem.year,
                             Poster = watchlistItem.poster,
-                                Type = "movie",
+                            Type = "movie",
                             Plot = "",
                             Director = "",
                             Actors = "",
+                            imdbRating = "",
                             Genre = "",
                             Rated = "",
                             Released = "",
@@ -162,30 +215,28 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                             Awards = "",
                             Ratings = emptyList(),
                             Metascore = "",
-                            imdbRating = "",
                             imdbVotes = "",
                             DVD = "",
                             BoxOffice = "",
                             Production = "",
                             Website = "",
                             Response = ""
-
-
-
                         )
                     )
                 },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), shape = CircleShape)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Delete,
+                    imageVector = Icons.Default.Close,
                     contentDescription = "Remove from Watchlist",
                     tint = MaterialTheme.colorScheme.error
                 )
             }
-        }
+            }
+
     }
 }
 
@@ -226,14 +277,23 @@ fun EmptyWatchlistMessage(filter: WatchlistFilter) {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = when (filter) {
-                WatchlistFilter.ALL -> "Your watchlist is empty"
-                WatchlistFilter.PLANNED -> "No planned items in your watchlist"
-                WatchlistFilter.COMPLETED -> "No completed items in your watchlist"
-            },
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = Icons.Default.List,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = when (filter) {
+                    WatchlistFilter.ALL -> "Your watchlist is empty"
+                    WatchlistFilter.PLANNED -> "No planned items in your watchlist"
+                    WatchlistFilter.COMPLETED -> "No completed items in your watchlist"
+                },
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
     }
 }
