@@ -1,32 +1,64 @@
-package com.example.movieapp
-
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import com.example.movieapp.data.WatchlistItem  // Add this import
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.movieapp.Movie
+import com.example.movieapp.MovieViewModel
+import com.example.movieapp.data.WatchlistItem
+import com.example.movieapp.ui.theme.MovieAppTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WatchlistScreen(viewModel: MovieViewModel = viewModel()) {
     val watchlist by viewModel.watchlist.collectAsState(initial = emptyList())
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (watchlist.isNotEmpty()) {
-            LazyColumn {
-                items(watchlist) { watchlistItem ->
-                    WatchlistItemCard(watchlistItem, viewModel)
+    MovieAppTheme {
+        Scaffold(
+            topBar = {
+                SmallTopAppBar(
+                    title = { Text("My Watchlist") },
+                    colors = TopAppBarDefaults.smallTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                )
+            }
+        ) { paddingValues ->
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                if (watchlist.isNotEmpty()) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(minSize = 160.dp),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(watchlist) { watchlistItem ->
+                            WatchlistItemCard(watchlistItem, viewModel)
+                        }
+                    }
+                } else {
+                    EmptyWatchlistMessage()
                 }
             }
-        } else {
-            Text("No movies in watchlist", modifier = Modifier.padding(16.dp))
         }
     }
 }
@@ -36,57 +68,75 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .aspectRatio(0.7f),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Box {
             AsyncImage(
                 model = watchlistItem.poster,
                 contentDescription = "${watchlistItem.title} poster",
-                modifier = Modifier.size(100.dp)
-            )
-            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
+                    .fillMaxSize()
+                    .clip(MaterialTheme.shapes.medium),
+                contentScale = ContentScale.Crop
+            )
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
             ) {
-                Text(watchlistItem.title, style = MaterialTheme.typography.headlineSmall)
-                Text(watchlistItem.year, style = MaterialTheme.typography.bodyMedium)
-            }
-            IconButton(onClick = {
-                viewModel.toggleWatchlist(
-                    Movie(
-                        Title = watchlistItem.title,
-                        Year = watchlistItem.year,
-                        Rated = "", // Provide appropriate value
-                        Released = "", // Provide appropriate value
-                        Runtime = "", // Provide appropriate value
-                        Genre = "", // Provide appropriate value
-                        Director = "", // Provide appropriate value
-                        Writer = "", // Provide appropriate value
-                        Actors = "", // Provide appropriate value
-                        Plot = "", // Provide appropriate value
-                        Language = "", // Provide appropriate value
-                        Country = "", // Provide appropriate value
-                        Awards = "", // Provide appropriate value
-                        Poster = watchlistItem.poster,
-                        Ratings = emptyList(), // Provide appropriate value
-                        Metascore = "", // Provide appropriate value
-                        imdbRating = "", // Provide appropriate value
-                        imdbVotes = "", // Provide appropriate value
-                        imdbID = watchlistItem.imdbID,
-                        Type = "movie",
-                        DVD = "", // Provide appropriate value
-                        BoxOffice = "", // Provide appropriate value
-                        Production = "", // Provide appropriate value
-                        Website = "", // Provide appropriate value
-                        Response = "" // Provide appropriate value
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(
+                        text = watchlistItem.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                )
-            }) {
+                    Text(
+                        text = watchlistItem.year,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+            IconButton(
+                onClick = {
+                    viewModel.toggleWatchlist(
+                        Movie(
+                            Title = watchlistItem.title,
+                            Year = watchlistItem.year,
+                            Poster = watchlistItem.poster,
+                            imdbID = watchlistItem.imdbID,
+                            Type = "movie",
+                            Actors = "", // Add appropriate value
+                            Awards = "", // Add appropriate value
+                            BoxOffice = "", // Add appropriate value
+                            Country = "", // Add appropriate value
+                            DVD = "", // Add appropriate value
+                            Director = "", // Add appropriate value
+                            Genre = "", // Add appropriate value
+                            Language = "", // Add appropriate value
+                            Metascore = "", // Add appropriate value
+                            Plot = "", // Add appropriate value
+                            Production = "", // Add appropriate value
+                            Rated = "", // Add appropriate value
+                            Ratings = emptyList(), // Add appropriate value
+                            Released = "", // Add appropriate value
+                            Response = "", // Add appropriate value
+                            Runtime = "", // Add appropriate value
+                            Website = "", // Add appropriate value
+                            Writer = "", // Add appropriate value
+                            imdbRating = "", // Add appropriate value
+                            imdbVotes = "" // Add appropriate value
+                        )
+                    )
+                },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Remove from Watchlist",
@@ -94,5 +144,19 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun EmptyWatchlistMessage() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            "Your watchlist is empty",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
     }
 }
