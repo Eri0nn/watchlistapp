@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import android.util.Log
 import androidx.navigation.NavController
+import com.example.movieapp.data.WatchStatus
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -50,6 +51,8 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+
+
     fun toggleWatchlist(movie: Movie) {
         viewModelScope.launch {
             val watchlistItem = WatchlistItem(movie.imdbID, movie.Title, movie.Year, movie.Poster)
@@ -61,6 +64,16 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateWatchStatus(imdbID: String, status: WatchStatus) {
+        viewModelScope.launch {
+            watchlistDao.updateWatchStatus(imdbID, status)
+        }
+    }
+
+    suspend fun getWatchStatus(imdbID: String): WatchStatus? {
+        return watchlistDao.getWatchStatus(imdbID)
+    }
+
     suspend fun isInWatchlist(movieId: String): Boolean {
         return watchlistDao.isInWatchlist(movieId)
     }
@@ -68,4 +81,7 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     fun onMovieClicked(navController: NavController, movie: Movie) {
         navController.navigate("movieDetail/${movie.imdbID}")
     }
+
+
+
 }

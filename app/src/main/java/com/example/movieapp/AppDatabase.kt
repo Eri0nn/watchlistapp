@@ -7,7 +7,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.movieapp.data.WatchlistItem
 
-@Database(entities = [WatchlistItem::class], version = 1)
+@Database(entities = [WatchlistItem::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun watchlistDao(): WatchlistDao
 
@@ -21,7 +21,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "movie_database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration() // This will delete the old database and create a new one
+                    .build()
                 INSTANCE = instance
                 instance
             }

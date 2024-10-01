@@ -103,24 +103,3 @@ fun MainScreen() {
 
 data class BottomNavItem(val route: String, val title: String, val icon: ImageVector)
 
-
-
-@Composable
-fun WatchlistItem(movie: String, onDelete: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(movie, style = MaterialTheme.typography.bodyLarge)
-        IconButton(onClick = onDelete) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete",
-                tint = MaterialTheme.colorScheme.error
-            )
-        }
-    }
-}
