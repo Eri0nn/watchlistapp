@@ -16,12 +16,10 @@ class MovieDetailViewModel : ViewModel() {
                 val response = RetrofitInstance.api.getMovieDetails("a8ae40f2", imdbID)
                 if (response.Response == "True") {
                     _movieDetails.value = response
-                } else {
-                    // Handle error
                 }
             } catch (e: Exception) {
-                // Handle error
-            }
+                _movieDetails.value = null
+                    }
         }
     }
 }

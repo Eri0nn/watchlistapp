@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieapp.ui.theme.MovieAppTheme
 
@@ -87,7 +88,11 @@ fun MainScreen() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("search") { MovieScreen(navController = navController) }
-            composable("watchlist") { WatchlistScreen(navController = navController) }
+
+            composable("watchlist") {
+                val viewModel: MovieViewModel = viewModel()
+                WatchlistScreen(viewModel = viewModel)
+            }
             composable("movieDetail/{imdbID}") { backStackEntry ->
                 val imdbID = backStackEntry.arguments?.getString("imdbID") ?: return@composable
                 MovieDetailScreen(imdbID = imdbID, onBackPressed = { navController.popBackStack() })
@@ -98,24 +103,7 @@ fun MainScreen() {
 
 data class BottomNavItem(val route: String, val title: String, val icon: ImageVector)
 
-@Composable
-fun WatchlistScreen(navController: NavController) {
-    var watchlist by remember { mutableStateOf(listOf<String>()) }
 
-    Column {
-        Text("Watchlist", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(16.dp))
-        LazyColumn {
-            items(watchlist) { movie ->
-                WatchlistItem(
-                    movie = movie,
-                    onDelete = {
-                        watchlist = watchlist.filter { it != movie }
-                    }
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun WatchlistItem(movie: String, onDelete: () -> Unit) {

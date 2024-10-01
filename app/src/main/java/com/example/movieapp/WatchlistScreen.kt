@@ -1,3 +1,4 @@
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -84,7 +85,7 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f) // Increased opacity
             ) {
                 Column(
                     modifier = Modifier.padding(8.dp)
@@ -136,11 +137,13 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), shape = MaterialTheme.shapes.small) // Added background to icon button
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Remove from Watchlist",
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(24.dp) // Increased icon size
                 )
             }
         }
