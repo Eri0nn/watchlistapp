@@ -67,7 +67,6 @@ fun MovieDetailScreen(
                             .padding(16.dp)
                     )
 
-                    // Back button
                     IconButton(
                         onClick = onBackPressed,
                         modifier = Modifier

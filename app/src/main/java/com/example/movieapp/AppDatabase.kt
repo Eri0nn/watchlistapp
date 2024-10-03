@@ -22,7 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "movie_database"
                 )
-                    .fallbackToDestructiveMigration() // This will delete the old database and create a new one
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

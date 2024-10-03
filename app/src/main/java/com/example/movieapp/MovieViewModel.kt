@@ -7,7 +7,6 @@ import com.example.movieapp.data.WatchlistItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import android.util.Log
 import androidx.navigation.NavController
 import com.example.movieapp.data.WatchStatus
 import retrofit2.HttpException
@@ -68,10 +67,6 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             watchlistDao.updateWatchStatus(imdbID, status)
         }
-    }
-
-    suspend fun getWatchStatus(imdbID: String): WatchStatus? {
-        return watchlistDao.getWatchStatus(imdbID)
     }
 
     suspend fun isInWatchlist(movieId: String): Boolean {

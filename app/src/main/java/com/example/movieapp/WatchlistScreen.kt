@@ -76,6 +76,7 @@ fun WatchlistScreen(viewModel: MovieViewModel = viewModel()) {
     }
 }
 
+
 @Composable
 fun FilterAndSortBar(
     currentFilter: WatchlistFilter,
@@ -186,10 +187,8 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                         text = watchlistItem.year,
                         style = MaterialTheme.typography.bodySmall
                     )
-                    if (expanded) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        WatchStatusToggle(watchlistItem, viewModel)
-                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    WatchStatusToggle(watchlistItem, viewModel)
                 }
             }
             IconButton(
@@ -235,41 +234,44 @@ fun WatchlistItemCard(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
                     tint = MaterialTheme.colorScheme.error
                 )
             }
-            }
-
+        }
     }
 }
 
 @Composable
 fun WatchStatusToggle(watchlistItem: WatchlistItem, viewModel: MovieViewModel) {
-    var status by remember { mutableStateOf(watchlistItem.status) }
+    val status = watchlistItem.status
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "Status:",
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Switch(
-            checked = status == WatchStatus.COMPLETED,
-            onCheckedChange = { isCompleted ->
-                val newStatus = if (isCompleted) WatchStatus.COMPLETED else WatchStatus.PLANNED
-                status = newStatus
+        Button(
+            onClick = {
+                val newStatus = if (status == WatchStatus.PLANNED) WatchStatus.COMPLETED else WatchStatus.PLANNED
                 viewModel.updateWatchStatus(watchlistItem.imdbID, newStatus)
             },
-            thumbContent = {
-                Icon(
-                    imageVector = if (status == WatchStatus.COMPLETED) Icons.Default.Check else Icons.Default.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize)
-                )
-            }
-        )
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (status == WatchStatus.COMPLETED)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            Icon(
+                imageVector = if (status == WatchStatus.COMPLETED) Icons.Default.Check else Icons.Default.PlayArrow,
+                contentDescription = null,
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = if (status == WatchStatus.COMPLETED) "Completed" else "Plan to Watch"
+            )
+        }
     }
 }
+
 
 @Composable
 fun EmptyWatchlistMessage(filter: WatchlistFilter) {
